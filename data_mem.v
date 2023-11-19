@@ -15,10 +15,10 @@ module data_mem(
             for (i=0;i<64;i=i+1) begin
                 mem[i] = 32'b0;
             end
-            mem[20] = 15;
-            mem[16] = 65340;
-            mem[24] = 243;
-            mem[28] = 16772668;
+            // mem[20] = 15;
+            // mem[16] = 65340;
+            // mem[24] = 243;
+            // mem[28] = 167722668;
         end
         else  begin
             //  0 : mem[A] <= WD ; 
