@@ -97,7 +97,7 @@ module controler (
                     reg_write = 1;
                     Asel = 0;
                     Bsel = 1;
-                    brUn = 0;
+                    brUn = 1;
                     WBsel = 1;
                 end
 
