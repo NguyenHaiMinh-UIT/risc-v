@@ -2,8 +2,7 @@ module alu(
     input [31:0] A,
     input [31:0] B,
     input  [3:0] alu_control,
-    output reg [31:0] alu_result,
-    output zero
+    output reg [31:0] alu_result
 );
     parameter   add     =   4'b0000;
     parameter   sub     =   4'b0001;
@@ -34,5 +33,4 @@ module alu(
             default : alu_result = 32'bx;
         endcase
     end
-    assign zero =  (alu_result == 0) ? 1:0;
 endmodule

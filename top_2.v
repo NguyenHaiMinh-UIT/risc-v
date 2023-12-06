@@ -1,6 +1,7 @@
-module top (
+module top_2 (
     input clk,
-    input rst
+    input rst, 
+    input [31:0] instr_in
 );
     wire [31:0] pc,pc_4,pc_next,alu_result,dmem,wb,instr,RD1,RD2,alu_A,alu_B,imm_out;
     wire [3:0] alu_control;
@@ -20,6 +21,7 @@ module top (
     );
     instructionmem instructionmem_instance(
         .address(pc),
+        .instr_in(instr_in),
         .RD(instr)
     );
     mux mux_pc(
@@ -84,7 +86,7 @@ module top (
         .B(alu_B),
         .alu_control(alu_control),
         .alu_result(alu_result)
-        // .zero(zero)
+
     );
     data_mem data_mem_instance(
         .clk(clk),

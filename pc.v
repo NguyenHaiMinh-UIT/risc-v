@@ -5,7 +5,7 @@ module pc (
 );
     // reg [31:0] pc;
     // assign pc_next = 32'b0;
-always @(posedge clk or negedge rst) begin
+always @(posedge clk ) begin
     if (!rst) pc <= 32'b0;
     else 
     pc <= pc_next;    

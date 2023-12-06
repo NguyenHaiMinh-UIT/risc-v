@@ -2,7 +2,7 @@ module controler (
     input  [6:0] opcode,
     input  [14:12] funct3,
     input  funct7, // instruction[30]
-    input  is_zero,eq,lt,
+    input  eq,lt,
     output reg pc_sel /*write = 0, read = 1*/,brUn,
     output reg [1:0] mem_write,
     output reg [3:0] alu_control ,
@@ -47,8 +47,6 @@ module controler (
 
 
     always @(*) begin
-
-        $display("%hopcode:",opcode);
         case (opcode)
             R_type      :  begin
                 if(funct7) begin
@@ -73,6 +71,8 @@ module controler (
                 pc_sel = 0;
                 immSel = 0;
                 reg_write = 1;
+                mem_write = 0;
+                brUn = 0;
                 Asel = 0;
                 Bsel = 0;
                 WBsel = 1;
@@ -93,9 +93,11 @@ module controler (
                 begin
                     pc_sel = 0;
                     immSel = 1;
+                    mem_write = 0;
                     reg_write = 1;
                     Asel = 0;
                     Bsel = 1;
+                    brUn = 0;
                     WBsel = 1;
                 end
 
@@ -170,7 +172,7 @@ module controler (
                     Bsel = 1;
                     Asel = 0;
                     alu_control = add;
-                    mem_write = 0;
+                    mem_write = 3;
                     WBsel = 0;
                 end
             end
@@ -179,7 +181,7 @@ module controler (
                     3'b000 : mem_write = 1;
                     3'b001 : mem_write = 2;
                     3'b010 : mem_write = 3;
-                    default: mem_write = 2'bx;
+                    default: mem_write = 2'b0;
                 endcase
                 begin
                     pc_sel = 0;
@@ -213,7 +215,6 @@ module controler (
                 WBsel = 2;
             end
             default: begin
-            $display("hi");
             pc_sel = 0;
             immSel = 0;
             reg_write = 1;
@@ -222,7 +223,7 @@ module controler (
             Bsel = 0;
             mem_write = 0;
             WBsel = 1;
-            alu_control=0;
+            alu_control=3;
             end
         endcase
 
