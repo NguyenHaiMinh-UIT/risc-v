@@ -126,21 +126,31 @@ module controler (
             B_type      :  begin
                 case (funct3)
                     3'b000 : begin // BEQ
-                        brUn = 0;
+                        brUn = 1;
                         if (eq) pc_sel = 1;
                         else pc_sel = 0;
                     end
                     3'b001 : begin // BNE
-                        brUn = 0;
+                        brUn = 1;
                         if (!eq) pc_sel = 1;
                         else pc_sel = 0;
                     end
                     3'b100 : begin
-                        brUn = 0;
+                        brUn = 1;
                         if (lt) pc_sel = 1;
                         else pc_sel = 0;
                     end
                     3'b101 : begin
+                        brUn = 1;
+                        if (!lt) pc_sel = 1;
+                        else pc_sel = 0 ;
+                    end
+                    3'b110 : begin
+                        brUn = 0;
+                        if (lt) pc_sel = 1;
+                        else pc_sel = 0;
+                    end
+                    3'b111 : begin
                         brUn = 0;
                         if (!lt) pc_sel = 1;
                         else pc_sel = 0 ;

@@ -102,7 +102,11 @@ program automatic test_bench_2(rv_io.tb rv_io);
                 bins f36 = {6};
                 bins f37 = {7};
             }
+            f_jalr : coverpoint f3 {
+                bins f30 = {0};
+            }
             cr1 : cross op_B,f;
+            cr2 : cross op_jalr,f_jalr;
         endgroup
         function new();
             cover_gr_Integer  = new();          
@@ -142,32 +146,17 @@ program automatic test_bench_2(rv_io.tb rv_io);
             s.itoa(pkts_generated);
             pkt2send.display(s);
         endfunction : gen_branch_jump
-        function abs(input int i);
-            // ins_arr.push_back(32'h004000ef);
-            // ins_arr.push_back(32'h00602223);
-            // ins_arr.push_back(32'h40428333);
-            // ins_arr.push_back(32'h010000ef);
-            // ins_arr.push_back(32'h00602223);
-            // ins_arr.push_back(32'h00034663);
-            // ins_arr.push_back(32'h40520333);
-            // ins_arr.push_back(32'h00218293);
-            // ins_arr.push_back(32'hff618213);
-            // ins_arr.push_back(32'h00202183);
-            // ins_arr.push_back(32'h004000ef);
-            ins_arr.push_back(temp_arr[i]);
-
-        endfunction
-        // function void gen_all();
-        //     pkt2send.constraint_select(3);
-        //     assert(pkt2send.randomize());
-        //     op = pkt2send.opcode;
-        //     f3 = pkt2send.funct3;
-        //     f7 = pkt2send.funct7;
-        //     ins_arr.push_back(pkt2send.genarate());
-        //     pkts_generated++;
-        //     s.itoa(pkts_generated);
-        //     pkt2send.display(s);
-        // endfunction : gen_all
+        function void gen_all();
+            pkt2send.constraint_select(3);
+            assert(pkt2send.randomize());
+            op = pkt2send.opcode;
+            f3 = pkt2send.funct3;
+            f7 = pkt2send.funct7;
+            ins_arr.push_back(pkt2send.genarate());
+            pkts_generated++;
+            s.itoa(pkts_generated);
+            pkt2send.display(s);
+        endfunction : gen_all
 
     endclass : gen
     ////================***CLASS GEN***==================///
@@ -191,46 +180,57 @@ program automatic test_bench_2(rv_io.tb rv_io);
 
     ////===============*** MAIN ***==================///
     initial begin
-//        geng.coverage coverage_inst = new();
         reset();
-        repeat(100) @(rv_io.cb)begin
+        // repeat(100) @(rv_io.cb)begin
+        //     rv_io.reset_n = 1'b1;
+        //     geng.gen_load_store();
+        //     geng.cover_gr_load_store.sample();
+        //     pktdrive.drive();
+        // end
+        // cover_percentage = geng.cover_gr_load_store.get_inst_coverage();
+        // $display("coverage percent: %f %%", cover_percentage);
+        // reset();          
+        // repeat(200) @(rv_io.cb)begin
+        //     rv_io.reset_n = 1'b1;
+        //     geng.gen_integer();
+        //     geng.cover_gr_Integer.sample();
+        //     pktdrive.drive();
+        // end
+        // cover_percentage = geng.cover_gr_Integer.get_inst_coverage();
+        // $display("coverage percent: %f %%", cover_percentage);
+
+        // reset();
+        // repeat (100) @(rv_io.cb) begin
+        //     rv_io.reset_n = 1'b1;
+        //     geng.gen_branch_jump();
+        //     geng.cover_gr_branch_jump.sample();
+        //     pktdrive.drive();
+        // end
+        // cover_percentage = geng.cover_gr_branch_jump.get_inst_coverage();
+        // $display("coverage percent: %f %%", cover_percentage);      
+        repeat(2000) @(rv_io.cb) begin
             rv_io.reset_n = 1'b1;
-            geng.gen_load_store();
+            geng.gen_all();
+            geng.cover_gr_Integer.sample();
+            geng.cover_gr_branch_jump.sample();
             geng.cover_gr_load_store.sample();
             pktdrive.drive();
-        end
-        cover_percentage = geng.cover_gr_load_store.get_inst_coverage();
-        $display("coverage percent: %f %%", cover_percentage);
+        end  
 
-        reset();
-        // geng.abs();
-        // repeat(10) @(rv_io.cb) begin
-            // integer i = 10;
-            // geng.abs(i);
-            // rv_io.reset_n = 1'b1;
-            // pktdrive.drive();
-            // i--;
-        // end
-           
-        repeat(200) @(rv_io.cb)begin
-            rv_io.reset_n = 1'b1;
-            geng.gen_integer();
-            geng.cover_gr_Integer.sample();
-            pktdrive.drive();
-        end
+
         cover_percentage = geng.cover_gr_Integer.get_inst_coverage();
         $display("coverage percent: %f %%", cover_percentage);
 
-        reset();
-        repeat (100) @(rv_io.cb) begin
-            rv_io.reset_n = 1'b1;
-            geng.gen_branch_jump();
-            geng.cover_gr_branch_jump.sample();
-            pktdrive.drive();
-        end
         cover_percentage = geng.cover_gr_branch_jump.get_inst_coverage();
-        $display("coverage percent: %f %%", cover_percentage);        
-            // cover_percentage = geng.cover_gr_Integer.get_coverage();
+        $display("coverage percent: %f %%", cover_percentage);
+
+        cover_percentage = geng.cover_gr_branch_jump.get_inst_coverage();
+        $display("coverage percent: %f %%", cover_percentage); 
+
+
+
+
+        // $get_coverage
     end
     ////===============*** END MAIN ***==================///
 endprogram : test_bench_2

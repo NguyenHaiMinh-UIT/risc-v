@@ -1,5 +1,5 @@
 class Packet;
-    rand bit [6:0] opcode;
+    rand bit [6:0] opcode;  // opcode
     rand bit [4:0] rs1;
     rand bit [4:0] rs2;
     rand bit [4:0] rd;
@@ -59,38 +59,51 @@ class Packet;
             funct3 dist {0,1,4,5,6,7};
         }
     }
-    // constraint all_instruction {
-    //     rd inside {[1:31]};
-    //     opcode dist {7'b0000011:=1, 7'b0100011:=1,7'b1101111:=1, 7'b0110011:=1, 7'b0010011:=1, 7'b0110111:=1, 7'b0010111:=1, 7'b1100111:=1, 7'b1100011:=1};
-    //     if (opcode == 7'b0000011)
-    //         funct3 dist {[0:5]:/6};
-    //     else if (opcode == 7'b0100011)
-    //         funct3 dist {[0:2]:/3};
-    //     else if (opcode == 7'b1100011) {
-    //         imm <= 512;
-    //         imm >= 1;
-    //     }
-    //     else if (opcode == 7'b1100111) {
-    //         funct3 == 0;
-    //     }
-    //     else if (opcode == 7'b1101111) {
-    //         imm_20 <= 512;
-    //         imm_20 >= 1;
-    //     }
-    //     else if (opcode == 7'b0110011) // R_type
-    //     {
-    //         if (funct3 == 0 || funct3 == 5)
-    //         funct7 dist {7'b0000000:=1,7'b0100000:=1};
-    //         else funct7 == 7'b0000000;
-    //     }
-    //     else if (opcode == 7'b0010011) // I_R_type
-    //     {
-    //         if (funct3 == 5) {
-    //         funct7 dist {7'b0000000:=1, 7'b0100000:=1};
-    //         }
-    //         else funct7 == 7'b0000000;
-    //     }
-    // }
+    constraint all_instruction {
+        
+        opcode dist {7'b0110011:=1, 7'b0010011:=1 ,7'b0110111:=1, 7'b0010111:=1,7'b0000011:=1,7'b0100011:=1,7'b1101111:=1, 7'b1100111:=1, 7'b1100011:=1};
+        funct3 dist {[0:7]:=1};
+        if (opcode == 7'b0110011) // R_type
+        {
+            rd inside {[1:31]};
+            if (funct3 == 0 || funct3 == 5)
+            funct7 dist {7'b0000000:=1,7'b0100000:=1};
+            else funct7 == 7'b0000000;
+        }
+        else if (opcode == 7'b0010011) // I_R_type
+        {   
+            rd inside {[1:31]};
+            imm inside {[0:2]};
+            if (funct3 == 5) {
+                funct7 dist {7'b0000000, 7'b0100000};
+            }
+            else funct7 == 7'b0000000;
+        }
+        else if  (opcode == 7'b0110111 || opcode == 7'b0010111) {
+            rd inside {[1:31]};
+            imm_20 inside {[1:10]};
+        }
+        else if (opcode == 7'b0000011) {
+            rd inside {[1:31]};
+            funct3 dist {0,1,2,4,5};
+            imm inside {[1:16]};
+        }
+        else if (opcode == 7'b0100011) {
+            funct3 dist {[0:2]};
+            imm inside {[1:16]};
+        }
+        else if (opcode == 7'b1101111)
+            imm_20 inside {-12,-8,-4,4,8,12};
+        else if (opcode == 7'b1100111) {
+            imm inside {-8,-4, 4 ,8 ,12};
+            rs1 == 0;
+            funct3 == 0;
+        }
+        else if (opcode == 7'b1100011) {
+            imm inside {[1:16]};
+            funct3 dist {0,1,4,5,6,7};
+        }
+    }
 ////==============================***CONSTRAINS***====================================///
     extern function new(input string name = "Packet");
     extern function logic[31:0] genarate();
@@ -134,6 +147,7 @@ function void Packet::display(input string prefix);
     $display("RS2: %d", this.rs2);
     $display("RD: %d", this.rd);
     $display("Immediate: %d\t%h", this.imm,this.imm);
+    $display("Immediate_20: %d\t%h", this.imm_20,this.imm_20);
     $display("FUNCT3: %b", this.funct3);
     $display("FUNCT7: %b", this.funct7);
     $display("Instruction: %h", this.instruction);
@@ -144,24 +158,24 @@ function void Packet::constraint_select(input bit [1:0] constrain_sel);
         this.group_integer.constraint_mode(1);
         this.group_load_store.constraint_mode(0);
         this.group_branch_jump.constraint_mode(0);
-        // this.all_instruction.constraint_mode(0);
+        this.all_instruction.constraint_mode(0);
     end
     else if (constrain_sel == 1) begin
         this.group_integer.constraint_mode(0);
         this.group_load_store.constraint_mode(1);
         this.group_branch_jump.constraint_mode(0);
-        // this.all_instruction.constraint_mode(0);
+        this.all_instruction.constraint_mode(0);
     end
     else if (constrain_sel == 2) begin
         this.group_integer.constraint_mode(0);
         this.group_load_store.constraint_mode(0);
         this.group_branch_jump.constraint_mode(1);
-        // this.all_instruction.constraint_mode(0);
+        this.all_instruction.constraint_mode(0);
     end
     else if (constrain_sel == 3) begin
         this.group_integer.constraint_mode(0);
         this.group_load_store.constraint_mode(0);
         this.group_branch_jump.constraint_mode(0);
-        // this.all_instruction.constraint_mode(1);
+        this.all_instruction.constraint_mode(1);
     end
 endfunction
